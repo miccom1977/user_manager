@@ -18,9 +18,9 @@ abstract class BaseModel implements CRUDInterface
 
 	/** Base Create User method
 	 * @param array $data
-	 * @return false|string
+	 * @return int
 	 */
-	public function create(array $data)
+	public function create(array $data): int
 	{
 		try {
 			// Prepare params to SQL Query
@@ -36,15 +36,15 @@ abstract class BaseModel implements CRUDInterface
 			return $this->pdo->lastInsertId();
 		} catch (PDOException $e) {
 			error_log("Error in add record: " . $e->getMessage());
-			return false;
+			return 0;
 		}
 	}
 
 	/** Base Show UserData method
 	 * @param int $id
-	 * @return false|mixed
+	 * @return array
 	 */
-	public function read(int $id)
+	public function read(int $id): array
 	{
 		try {
 			// Prepare SQL
@@ -58,35 +58,39 @@ abstract class BaseModel implements CRUDInterface
 			return $statement->fetch(PDO::FETCH_ASSOC);
 		} catch (PDOException $e) {
 			error_log("Error in Get User Data method: " . $e->getMessage());
-			return false;
+			return [];
 		}
 	}
 
 	/** Base Update User Data method
-	 * @param array $userData
+	 * @param array $data
+	 * @param array $conditions
 	 * @return array
 	 */
-	public function update(array $userData)
+	public function update(array $data, array $conditions): array
 	{
 		try {
-			// Prepare SQL
-			$query = "UPDATE {$this->tableName} SET name = :name, first_name = :first_name, last_name = :last_name, birth_date = :birth_date WHERE id = :id";
+			// Prepare table sql
+			$query = "UPDATE {$this->tableName} SET ";
+			// prepare column sql
+			$setValues = $this->prepareElementsToQuery($data);
+			$query .= implode(", ", $setValues);
 
-			// Bind Params
+			// prepare were sql
+			$whereConditions = $this->prepareElementsToQuery($conditions);
+			$whereClause = implode(" AND ", $whereConditions);
+
+			// join all
+			$query .= " WHERE " . $whereClause;
+
+			// prepare PDO
 			$statement = $this->pdo->prepare($query);
-			$statement->execute([
-				'id' => $userData['id'],
-				'name' => $userData['name'],
-				'first_name' => $userData['first_name'],
-				'last_name' => $userData['last_name'],
-				'birth_date' => $userData['birth_date']
-			]);
+			$statement->execute(array_merge($data, $conditions));
 
-			return ['success' => true, 'message' => 'User data saved.'];
+			return ['success' => true, 'message' => 'Data updated successfully'];
 		} catch (PDOException $e) {
-			error_log('Error in update user data: ' . $e->getMessage());
-			return ['success' => false, 'message' => 'Error in update user data: ' . $e->getMessage()];
-
+			error_log("Error Update method: " . $e->getMessage());
+			return ['success' => false, 'message' => 'Error updating data: ' . $e->getMessage()];
 		}
 	}
 
@@ -94,7 +98,7 @@ abstract class BaseModel implements CRUDInterface
 	 * @param int $id
 	 * @return bool
 	 */
-	public function delete(int $id)
+	public function delete(int $id): bool
 	{
 		try {
 			// Prepare SQL
@@ -107,8 +111,21 @@ abstract class BaseModel implements CRUDInterface
 			// If done, return true
 			return true;
 		} catch (PDOException $e) {
-			error_log("Błąd podczas usuwania rekordu: " . $e->getMessage());
+			error_log("Error in delete data: " . $e->getMessage());
 			return false;
 		}
+	}
+
+	/** Method prepare elements to query from array
+	 * @param array $conditions
+	 * @return array
+	 */
+	private function prepareElementsToQuery(array $conditions): array
+	{
+		$aConditions = [];
+		foreach ($conditions as $column => $value) {
+			$aConditions[] = "$column = :$column";
+		}
+		return $aConditions;
 	}
 }

@@ -13,7 +13,7 @@
     <!-- Bootstrap JavaScript -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
-        .user-details-modal {
+        .group-details-modal {
             display: none;
             position: fixed;
             z-index: 1;
@@ -25,7 +25,7 @@
             background-color: rgba(0,0,0,0.4);
         }
 
-        .user-details-content {
+        .group-details-content {
             background-color: #fefefe;
             padding: 20px;
             border: 1px solid #888;
@@ -55,65 +55,63 @@
     </style>
 </head>
 <body>
-<div id="userListContainer" class="mx-auto w-75">
+<div id="groupListContainer" class="mx-auto w-75">
     <table class="table table-hover">
         <thead>
         <tr>
             <th scope="col">#</th>
             <th scope="col">Name</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Date of birth</th>
-            <th scope="col">Action  <button class="addUserBtn btn btn-secondary">Add user</button></th>
+            <th scope="col">Users</th>
+            <th scope="col">Action  <button class="addGroupBtn btn btn-secondary">Add group</button> <a href="/" class="btn btn-primary">Manage Users</a></th>
         </tr>
         </thead>
-        <tbody id="userList">
+        <tbody id="groupList">
         </tbody>
     </table>
 </div>
 
 <script>
     $(document).ready(function() {
-        fetchUserData();
-        $('body').on('click', '.viewBtn', function() {
+        fetchGroupData();
+        $('body').on('click', '.viewGroupBtn', function() {
+            const groupId = $(this).data('id');
+            showGroupDetails(groupId);
+        });
+
+        $('body').on('click', '.deleteGroupBtn', function() {
+            const groupId = $(this).data('id');
+            deleteGroup(groupId);
+        });
+
+        $('body').on('click', '.addGroupBtn', function() {
+            showGroupForm();
+        });
+
+        $('body').on('click', '.editGroupBtn', function() {
             const userId = $(this).data('id');
-            showUserDetails(userId);
+            showEditGroupForm(userId);
         });
 
-        $('body').on('click', '.deleteBtn', function() {
-            const userId = $(this).data('id');
-            deleteUser(userId);
+        $('body').on('click', '.close, #GroupDetailsModal', function() {
+            $('#groupDetailsModal, .group-details-content').css('display', 'none');
         });
 
-        $('body').on('click', '.addUserBtn', function() {
-            showUserForm();
+        $('body').on('click', '#sendGroupButton', function() {
+            addGroup();
         });
 
-        $('body').on('click', '.editBtn', function() {
-            const userId = $(this).data('id');
-            showEditUserForm(userId);
-        });
-
-        $('body').on('click', '.close, #userDetailsModal', function() {
-            $('#userDetailsModal, .user-details-content').css('display', 'none');
-        });
-
-        $('body').on('click', '#sendButton', function() {
-            addUser();
-        });
-
-        $('body').on('click', '#updateButton', function() {
-            const userId = $(this).data('id');
-            updateUser(userId);
+        $('body').on('click', '#updateGroupButton', function() {
+            const groupId = $(this).data('id');
+            updateGroup(groupId);
         });
     });
 </script>
-<script src="../js/functions.js"></script>
+<script src="../js/groups.js"></script>
 <!-- Kontener na modal -->
-<div id="userDetailsModal" class="user-details-modal">
+<div id="groupDetailsModal" class="group-details-modal">
 </div>
-<div class="user-details-content">
-    <div id="userDetailsContent">
+<div class="group-details-content">
+    <div id="groupDetailsContent">
         <!-- Tutaj zostaną wyświetlone szczegóły użytkownika -->
     </div>
 </div>

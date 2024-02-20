@@ -1,20 +1,24 @@
 <?php
 namespace App\Controllers;
 
+use App\Services\GroupService;
 use App\Services\UserService;
 
 class UserController
 {
-	protected $userService;
+	protected UserService $userService;
+	protected GroupService $groupService;
 
-	public function __construct(UserService $userService) {
+	public function __construct(UserService $userService, GroupService $groupService) {
 		$this->userService = $userService;
+		$this->groupService = $groupService;
 	}
 
 	/** Show User list method
 	 * @return void
 	 */
-	public function index() {
+	public function index(): void
+	{
 		// Get user list
 		$users = $this->userService->getAllUsers();
 
@@ -26,7 +30,7 @@ class UserController
 	/** Add new user method
 	 * @return void
 	 */
-	public function create()
+	public function create(): void
 	{
 
 		$userData = $this->validateData($_POST);
@@ -47,11 +51,10 @@ class UserController
 	 * @param $userId
 	 * @return void
 	 */
-	public function read($userId)
+	public function read($userId): void
 	{
 		// Get UserData
 		$userData = $this->userService->getUserById($userId);
-
 		// Put data to endpoint
 		header('Content-Type: application/json');
 		echo json_encode($userData);
@@ -62,7 +65,7 @@ class UserController
 	 * @param $userId
 	 * @return void
 	 */
-	public function delete($userId)
+	public function delete($userId): void
 	{
 		$userData = $this->userService->deleteUserById($userId);
 		// Put data to endpoint
@@ -74,13 +77,13 @@ class UserController
 	 * @param $userId
 	 * @return void
 	 */
-	public function update($userId)
+	public function update($userId): void
 	{
 		// Send POST Data to validate
-		$userData = $this->validateData($_POST, $userId);
-
+		$userData = $this->validateData($_POST);
+		$conditions = ['id' => $userId];
 		// Update UserData to service method
-		$result = $this->userService->updateUser($userData);
+		$result = $this->userService->updateUser($userData, $conditions);
 
 		// Put data to endpoint
 		header('Content-Type: application/json');
@@ -89,10 +92,9 @@ class UserController
 
 	/** Validate Data method
 	 * @param $post
-	 * @param null $userId
-	 * @return array|void
+	 * @return array
 	 */
-	private function validateData($post, $userId = null)
+	private function validateData($post): array
 	{
 		$errors = [];
 
@@ -109,6 +111,11 @@ class UserController
 		$last_name = filter_var($post['last_name'], FILTER_SANITIZE_STRING);
 		if (empty($last_name)) {
 			$errors[] = ['field' => 'last_name', 'message' => 'Field "Last name" is required'];
+		}
+
+		$group_id = filter_var($post['group'], FILTER_VALIDATE_INT);
+		if (empty($group_id)) {
+			$errors[] = ['field' => 'group', 'message' => 'Field "Group" is required'];
 		}
 
 		$date_of_birth = $post['birth_date'] ?? null;
@@ -129,11 +136,11 @@ class UserController
 			exit;
 		}
 		return [
-			'id' => $userId,
 			'name' => $name,
 			'first_name' => $first_name,
 			'last_name' => $last_name,
-			'birth_date' => $date_of_birth
+			'birth_date' => $date_of_birth,
+			'group_id' => $group_id
 		];
 	}
 }

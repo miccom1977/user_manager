@@ -17,13 +17,13 @@ class User extends BaseModel
 	 * @param array $data
 	 * @return false|string
 	 */
-	public function create(array $data)
+	public function create(array $data): int
 	{
 		try {
 			return parent::create($data);
 		} catch (PDOException $e) {
 			error_log("Error Add User method: " . $e->getMessage());
-			return false;
+			return 0;
 		}
 	}
 
@@ -31,27 +31,28 @@ class User extends BaseModel
 	 * @param int $id
 	 * @return false|mixed
 	 */
-	public function read(int $id)
+	public function read(int $id): array
 	{
 		try {
 			return parent::read($id);
 		} catch (PDOException $e) {
 			error_log("Error Get User Data method: " . $e->getMessage());
-			return false;
+			return [];
 		}
 	}
 
 	/** Update User method
-	 * @param array $userData
-	 * @return array|false
+	 * @param array $data
+	 * @param array $conditions
+	 * @return array
 	 */
-	public function update(array $userData)
+	public function update(array $data, array $conditions): array
 	{
 		try {
-			return parent::update($userData);
+			return parent::update($data, $conditions);
 		} catch (PDOException $e) {
 			error_log("Error Update User method: " . $e->getMessage());
-			return false;
+			return ['success' => false, 'message' => 'Error updating data: ' . $e->getMessage()];
 		}
 	}
 
@@ -59,7 +60,7 @@ class User extends BaseModel
 	 * @param int $id
 	 * @return bool
 	 */
-	public function delete(int $id)
+	public function delete(int $id): bool
 	{
 		try {
 			return parent::delete($id);
@@ -70,11 +71,14 @@ class User extends BaseModel
 	}
 
 	/** Show All Users method
-	 * @return array|false
+	 * @return array
 	 */
-	public function getAllUsers()
+	public function getAllUsers(): array
 	{
-		$query = "SELECT * FROM users";
+		$query = "SELECT users.*, groups.name AS group_name
+			FROM users
+			LEFT JOIN groups ON users.group_id = groups.id
+		";
 		$stmt = $this->db->query($query);
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}

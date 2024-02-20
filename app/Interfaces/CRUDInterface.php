@@ -3,11 +3,11 @@ namespace app\Interfaces;
 
 interface CRUDInterface
 {
-	public function create(array $data);
+	public function create(array $data): int;
 
-	public function read(int $id);
+	public function read(int $id): array;
 
-	public function update(array $userData);
+	public function update(array $data, array $conditions): array;
 
-	public function delete(int $id);
+	public function delete(int $id): bool;
 }

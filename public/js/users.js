@@ -15,13 +15,14 @@ function fetchUserData() {
 }
 
 function getUserDataFromForm() {
-    const userData = {
+    return {
         name: $('#name').val(),
         first_name: $('#first_name').val(),
         last_name: $('#last_name').val(),
-        birth_date: $('#birth_date').val()
+        birth_date: $('#birth_date').val(),
+        group: $('#group').val()
+
     };
-    return userData;
 }
 
 function addUser() {
@@ -57,6 +58,7 @@ function createUserRow(user) {
     row += '<td>' + user.first_name + '</td>';
     row += '<td>' + user.last_name + '</td>';
     row += '<td>' + user.birth_date + '</td>';
+    row += '<td>' + user.group_name + '</td>';
     row += '<td>';
     row += '<button type="button" class="btn btn-info btn-sm viewBtn mx-2" data-id="' + user.id + '">View</button>';
     row += '<button type="button" class="btn btn-danger btn-sm deleteBtn mx-2" data-id="' + user.id + '">Delete</button>';
@@ -86,6 +88,7 @@ function showUserDetails(userId) {
                     <p><strong>First Name:</strong> ${response.first_name}</p>
                     <p><strong>Last Name:</strong> ${response.last_name}</p>
                     <p><strong>Birth Date:</strong> ${response.birth_date}</p>
+                    <p><strong>Group:</strong> ${response.group_name}</p>
                 </div>
             `;
 
@@ -101,39 +104,51 @@ function showUserDetails(userId) {
 }
 
 function showUserForm(userData = null) {
-    const modalContent = `
-        <div class="modal-header">
-            <h5 class="modal-title">User Details</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div>
-                <label for="name">Name:</label><br>
-                <input type="text" id="name" name="name" class="form-control" value="${userData ? userData.name : ''}"><span id="name_error"></span>
-            </div>
-            <div>
-                <label for="first_name">First Name:</label><br>
-                <input type="text" id="first_name" name="first_name" class="form-control" value="${userData ? userData.first_name : ''}"><span id="first_name_error"></span>
-            </div>
-            <div>
-                <label for="last_name">Last Name:</label><br>
-                <input type="text" id="last_name" name="last_name" class="form-control" value="${userData ? userData.last_name : ''}"><span id="last_name_error"></span>
-            </div>
-            <div>
-                <label for="birth_date">Date of birth:</label><br>
-                <input type="date" id="birth_date" name="birth_date" class="form-control" value="${userData ? userData.birth_date : ''}"><span id="birth_date_error"></span>
-            </div>
-            <div>
-                <button id="${userData ? 'updateButton' : 'sendButton'}" class="btn btn-primary" ${userData ? 'data-id="' + userData.id + '"' : ''}>${userData ? 'Save Changes' : 'Add User'}</button>
-            </div>
-        </div>
-    `;
+    let groupOptions = '';
+    getAllGroups(function(groups) {
+        groups.forEach(group => {
+            let selected = userData && userData.group_id == group.id ? 'selected' : ''; // if userData.group == group.id -> selected
+            groupOptions += `<option value="${group.id}" ${selected}>${group.name}</option>`;
+        });
 
-    $('#userDetailsContent').html(modalContent);
+        const modalContent = `
+            <div class="modal-header">
+                <h5 class="modal-title">User Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label for="name">Name:</label><br>
+                    <input type="text" id="name" name="name" class="form-control" value="${userData ? userData.name : ''}"><span id="name_error"></span>
+                </div>
+                <div>
+                    <label for="first_name">First Name:</label><br>
+                    <input type="text" id="first_name" name="first_name" class="form-control" value="${userData ? userData.first_name : ''}"><span id="first_name_error"></span>
+                </div>
+                <div>
+                    <label for="last_name">Last Name:</label><br>
+                    <input type="text" id="last_name" name="last_name" class="form-control" value="${userData ? userData.last_name : ''}"><span id="last_name_error"></span>
+                </div>
+                <div>
+                    <label for="birth_date">Date of birth:</label><br>
+                    <input type="date" id="birth_date" name="birth_date" class="form-control" value="${userData ? userData.birth_date : ''}"><span id="birth_date_error"></span>
+                </div>
+                <div>
+                    <label for="group">Group:</label><br>
+                    <select id="group" name="group" class="form-control">${groupOptions}</select>
+                </div>
+                <div>
+                    <button id="${userData ? 'updateButton' : 'sendButton'}" class="btn btn-primary" ${userData ? 'data-id="' + userData.id + '"' : ''}>${userData ? 'Save Changes' : 'Add User'}</button>
+                </div>
+            </div>
+        `;
 
-    $('#userDetailsModal, .user-details-content').css('display', 'block');
+        $('#userDetailsContent').html(modalContent);
+
+        $('#userDetailsModal, .user-details-content').css('display', 'block');
+    });
 }
 
 function deleteUser(userId) {
@@ -188,5 +203,17 @@ function updateUser(userId) {
         }
     }).fail(function(xhr, status, error) {
         console.error('Errors add new User Method:', error);
+    });
+}
+
+function getAllGroups(callback) {
+    $.ajax({
+        url: '/groups',
+        type: 'GET',
+        dataType: "json",
+    }).done(function(groups) {
+        callback(groups); // Wywołaj funkcję zwrotną i przekaż pobrane grupy
+    }).fail(function(xhr, status, error) {
+        console.error('Errors during fetching groups:', error); // Obsłuż błąd
     });
 }

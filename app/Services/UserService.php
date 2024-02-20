@@ -23,9 +23,9 @@ class UserService
 
 	/** Get User Data by Id method
 	 * @param $userId
-	 * @return false|mixed
+	 * @return array
 	 */
-	public function getUserById($userId)
+	public function getUserById($userId): array
 	{
 		// Use Model Method
 		return $this->user->read($userId);
@@ -33,15 +33,15 @@ class UserService
 
 	/** Create User method
 	 * @param $userData
-	 * @return false|string|null
+	 * @return int
 	 */
-	public function createUser($userData)
+	public function createUser($userData): int
 	{
 		try {
 			// Use Model Method
 			return $this->user->create($userData);
 		} catch (PDOException $e) {
-			return null;
+			return 0;
 		}
 	}
 
@@ -62,11 +62,12 @@ class UserService
 
 	/** Update User Data method
 	 * @param array $userData
-	 * @return array|false
+	 * @param array $conditions
+	 * @return array
 	 */
-	public function updateUser(array $userData)
+	public function updateUser(array $userData, array $conditions): array
 	{
 		// Use Model Method
-		return $this->user->update($userData);
+		return $this->user->update($userData, $conditions);
 	}
 }
