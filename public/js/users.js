@@ -73,33 +73,31 @@ function showUserDetails(userId) {
         url: '/users/' + userId,
         type: 'GET',
         dataType: 'json',
-        success: function(response) {
-            // Prepare modal Content
-            const modalContent = `
-                <div class="modal-header">
-                    <h5 class="modal-title">User Details</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p><strong>ID:</strong> ${response.id}</p>
-                    <p><strong>Name:</strong> ${response.name}</p>
-                    <p><strong>First Name:</strong> ${response.first_name}</p>
-                    <p><strong>Last Name:</strong> ${response.last_name}</p>
-                    <p><strong>Birth Date:</strong> ${response.birth_date}</p>
-                    <p><strong>Group:</strong> ${response.group_name}</p>
-                </div>
-            `;
+    }).done(function(response) {
+        // Prepare modal Content
+        const modalContent = `
+            <div class="modal-header">
+                <h5 class="modal-title">User Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>ID:</strong> ${response.id}</p>
+                <p><strong>Name:</strong> ${response.name}</p>
+                <p><strong>First Name:</strong> ${response.first_name}</p>
+                <p><strong>Last Name:</strong> ${response.last_name}</p>
+                <p><strong>Birth Date:</strong> ${response.birth_date}</p>
+                <p><strong>Group:</strong> ${response.group_name}</p>
+            </div>
+        `;
 
-            $('#userDetailsContent').html(modalContent);
+        $('#userDetailsContent').html(modalContent);
 
-            // Show modal
-            $('#userDetailsModal, .user-details-content').css('display', 'block');
-        },
-        error: function(xhr, status, error) {
-            console.error('Error in get User Data method:', error);
-        }
+        // Show modal
+        $('#userDetailsModal, .user-details-content').css('display', 'block');
+    }).fail(function(xhr, status, error) {
+        console.error('Error in get User Data method:', error);
     });
 }
 
