@@ -60,7 +60,8 @@ abstract class BaseModel implements CRUDInterface
 
 			// Prepare and Execute Query
 			$statement = $this->pdo->prepare($query);
-			$statement->execute(['id' => $id]);
+			$statement->bindValue(':id', $id, PDO::PARAM_INT);
+			$statement->execute();
 
 			// Return User Data
 			return $statement->fetch(PDO::FETCH_ASSOC);
@@ -93,7 +94,14 @@ abstract class BaseModel implements CRUDInterface
 
 			// prepare PDO
 			$statement = $this->pdo->prepare($query);
-			$statement->execute(array_merge($data, $conditions));
+
+			$paramsToBind = array_merge($data, $conditions);
+
+			foreach ($paramsToBind as $key => $value) {
+				$statement->bindValue(':' . $key, $value);
+			}
+
+			$statement->execute();
 
 			return ['success' => true, 'message' => 'Data updated successfully'];
 		} catch (PDOException $e) {
