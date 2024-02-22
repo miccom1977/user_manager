@@ -48,7 +48,15 @@ abstract class BaseModel implements CRUDInterface
 	{
 		try {
 			// Prepare SQL
-			$query = "SELECT * FROM {$this->tableName} WHERE id = :id";
+			$queryJoin = "SELECT m.*";
+			$lJoin = $queryWhere = '';
+			if ($this->tableName == 'users') {
+				$queryJoin .= ", groups.name AS group_name";
+				$lJoin = " LEFT JOIN groups ON m.group_id = groups.id";
+			}
+			$queryJoin .= " FROM {$this->tableName} m";
+			$queryWhere .= " WHERE m.id = :id";
+			$query = $queryJoin . $lJoin . $queryWhere;
 
 			// Prepare and Execute Query
 			$statement = $this->pdo->prepare($query);
